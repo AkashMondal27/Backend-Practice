@@ -1,22 +1,32 @@
 import dotenv from "dotenv";
 import connectDB from "../src/db/index.js";
+import app from '../src/app.js'
 
 dotenv.config({
-    path :"./env"
+    path: "./env"
 })
 
 
 
-connectDB()
+connectDB() 
 
 
+// in dp we use async method which return some .then .catch
+.then(()=>{
+    app.listen(process.env.PORT || 8000 ,()=>{
+        console.log(`Server is running at Port : ${process.env.PORT}`)
+    })
 
 
+    app.on("error", (error) => {
+      console.error("❌ Application could not talk to the database:", error);
+      throw error;
+    })
+})
 
-
-
-
-
+.catch((err)=>{
+   console.log("mongpDB connection failed !" , err)
+})
 
 /*.........................................................................................
 -------------------------------------------------------------------------------------------
