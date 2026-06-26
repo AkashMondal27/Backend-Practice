@@ -9,7 +9,13 @@ app.use(cors({
     credentials:true
 }))
 
+//setting to get different types of data --Json , Url , public files
+app.use(express.json({limit:"16kb"}))
+app.use(express.urlencoded({extended:true, limit:"16kb"}))
+app.use(express.static("public"))   //store file store in my server 
 
+//add the cookies 
+app.use(cookieParser())
 
 
 export default {app}
