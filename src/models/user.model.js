@@ -74,20 +74,29 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 
+
+
+/*Gnerate AccessToken :-This method creates a JWT Access Token for the logged-in user.
+                       Access Token is short-lived and is used to authenticate API requests. */
 userSchema.methods.generateAccessToken = async function(){
-  return jwt.sign(
+  return jwt.sign(     // jwt.sign() creates a new token.
     {
     _id:this._id,
     email:this.email,
     username:this.username,
     fullName:this.fullName
   },
-  process.env.ACCESS_TOKEN_SECRET,
+  process.env.ACCESS_TOKEN_SECRET,     // jwt.sign() creates a new token.
   {
     expiresIn:process.env.ACCESS_TOKEN_EXPIRY
   }
   )
 }
+
+
+/*Generate Refresh Token :-This method creates a Refresh Token.
+                    They are used to generate a new Access Token
+                     without asking the user to log in again. */
 userSchema.methods.generateRefreshToken= async function(){
    return jwt.sign(
     {
