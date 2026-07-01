@@ -20,4 +20,4 @@ const storage = multer.diskStorage({
 export const upload = multer({ storage: storage })
 
 /*  file.originalname)  ==> Save the file using its original name 
-// const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) :-If you want unique filenames .
+// const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) :-If you want unique filenames .*/
