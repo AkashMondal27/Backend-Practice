@@ -17,5 +17,11 @@ app.use(express.static("public"))   //store file store in my server
 //add the cookies 
 app.use(cookieParser())
 
+//routes import 
+import userRouter from './routes/user.routes.js'
 
-export default {app}
+
+//routes Decleration 
+app.use("/api/v1/users" , userRouter)  //"Whenever a request starts with "api/v1/usersr", send it to "userRouter" to find the matching route."
+
+export default app
