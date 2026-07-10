@@ -1,4 +1,4 @@
-import apiError from "./apiError"; // Imports the ApiError class (not used in this file)
+import { ApiError } from "../utils/ApiError.js"; // Imports the ApiError class (not used in this file)
 
 class ApiResponse {
     // Constructor is called automatically when a new ApiResponse object is created
