@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
   },
   watchHistory: [
     {
-      type: mongoose.Schema.types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "video"
 
     }
@@ -59,7 +59,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre("save", async function (next) {
   if (!this.isModified('password')) return next();  // This middleware runs automatically BEFORE a user document is saved
 
-  this.password = bcrypt.hash(this.password, 10)  // This middleware runs automatically BEFORE a user document is saved,10 is the salt rounds 
+  this.password = await bcrypt.hash(this.password, 10)  // This middleware runs automatically BEFORE a user document is saved,10 is the salt rounds 
   next()
 })
 

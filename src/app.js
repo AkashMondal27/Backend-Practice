@@ -24,4 +24,9 @@ import userRouter from './routes/user.routes.js'
 //routes Decleration 
 app.use("/api/v1/users" , userRouter)  //"Whenever a request starts with "api/v1/usersr", send it to "userRouter" to find the matching route."
 
+/* just to checek that the server is running 
+app.get("/", (req, res) => {
+    res.send("Server Working");
+}); */
+
 export default app
