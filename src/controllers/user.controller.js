@@ -137,6 +137,8 @@ const registerUser = asyncHandler(async (req, res) => {
         return res.status(500).json({
         message: "Failed to upload avatar to Cloudinary"
       });
+
+
 }
    /*Step :-7 ---------------------------------------------------------------------------------
                             Create the user in the database
