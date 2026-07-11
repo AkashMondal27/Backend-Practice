@@ -22,7 +22,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
    const { fullName, email, username, password } = req.body
 
-   console.log("email", email);
+   console.log(req.body);
 
    /* Step:2-------------------------------------------------------------------
                   Validate the Input 
@@ -96,7 +96,26 @@ const registerUser = asyncHandler(async (req, res) => {
                   Image & Avatar upload 
     ---------------------------------------------------------------------------------------*/
    const avatarLocalPath = req.files?.avatar[0]?.path;        //Check the Notes bellow for the working process👇
-   const coverImageLocalPath = req.files?.coverImage[0]?.path;
+   // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    
+   // coverimage is optional so we need this logic 
+   let coverImageLocalPath;
+
+   // Check whether a cover image has been uploaded
+   if(
+      req.files && 
+      Array.isArray(req.files.coverImage) &&
+       req.files.coverImage.length >0
+      ){
+         // Store the local file path of the uploaded cover image.
+         coverImageLocalPath=req.files.coverImage[0].path
+       }else{
+        console.log("Cover image is not uploaded (Optional)")
+       }
+
+
+    console.log(req.files);
+
 
    if (!avatarLocalPath) {
       throw new ApiError(400, "Avator Image is required ")

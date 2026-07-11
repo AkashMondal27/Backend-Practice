@@ -31,7 +31,9 @@ const uploadonCloudinary = async (localfilePath) => {
 
         // File uploaded successfully
         console.log("Cloudinary upload successful:", response && response.url)
-
+        
+        //remove local temporary files if exists 
+        fs.unlinkSync(localfilePath)
         return response
     } catch (error) {
         // remove local temporary file if exists
@@ -43,14 +45,7 @@ const uploadonCloudinary = async (localfilePath) => {
             console.error("Failed to remove temp file:", e)
         }
 
-        // Log detailed error information for debugging
-        console.error("Cloudinary upload failed:", error?.message || error)
-        if (error && (error.http_code || error.status_code)) {
-            console.error("Cloudinary status code:", error.http_code || error.status_code)
-        }
-        if (error && error.request_id) {
-            console.error("Cloudinary request id:", error.request_id)
-        }
+        
 
         return null
     }
