@@ -16,8 +16,6 @@ const registerUser =asyncHandler(async(req , res)=>{
 
 const registerUser = asyncHandler(async (req, res) => {
 
-   console.log("req.body:", req.body);
-  console.log("req.files:", req.files);
    /*  Step:-1 -------------------------------------------------------------------------
                        Get the data from body / frontend
     -------------------------------------------------------------------------------------- */
