@@ -60,7 +60,7 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified('password')) return next();  // This middleware runs automatically BEFORE a user document is saved
 
   this.password = await bcrypt.hash(this.password, 10)  // This middleware runs automatically BEFORE a user document is saved,10 is the salt rounds 
-  next()
+  
 })
 
 

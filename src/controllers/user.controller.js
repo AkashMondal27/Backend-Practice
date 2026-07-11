@@ -15,6 +15,9 @@ const registerUser =asyncHandler(async(req , res)=>{
 
 
 const registerUser = asyncHandler(async (req, res) => {
+
+   console.log("req.body:", req.body);
+  console.log("req.files:", req.files);
    /*  Step:-1 -------------------------------------------------------------------------
                        Get the data from body / frontend
     -------------------------------------------------------------------------------------- */
@@ -83,7 +86,7 @@ const registerUser = asyncHandler(async (req, res) => {
                       Check if the user already exists.
     --------------------------------------------------------------------------------*/
 
-   const existedUser = User.findOne({
+   const existedUser = await User.findOne({
       $or: [{ username }, { email }]   /*In MongoDB, $ indicates a special operator that perform a 
                                     specific operation, like OR, AND, greater than, less than, etc.*/
    })
@@ -110,10 +113,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
    /* Step :-6 ------------------Verify successful upload.------------------------*/
 
-      if(!avatar){
-         throw new ApiError(400, "Avator Image is required ")
-      }
-   
+      // if(!avatar){
+      //    throw new ApiError(400, "Failed to upload avatar to Cloudinary")
+      // }
+     if (!avatar) {
+        return res.status(500).json({
+        message: "Failed to upload avatar to Cloudinary"
+      });
+}
    /*Step :-7 ---------------------------------------------------------------------------------
                             Create the user in the database
    -----------------------------------------------------------------------------------------*/
