@@ -86,7 +86,7 @@ import ApiResponse from "../utils/ApiResponse.js";
             {
                 user:loggedInUser ,accessToken,refreshToken
             },
-            "User login Successfully "
+            "User loggged in Successfully "
         )
 
     )
@@ -94,13 +94,36 @@ import ApiResponse from "../utils/ApiResponse.js";
 
 
   const logoutUser=asyncHandler(async(req,res)=>{
+    
+   await User.findByIdAndUpdate(
+        req.user._id,
+        {
+              refreshToken: undefined  
+        },
+        {
+            new:true
+        }
+    )
+   
+    const option={     //(details explanation ⬇️⬇️)
+        httpOnly:true,
+        secure:true
+    }
+    
+    return res
+    .status(200)
+    .clearCookie("accessToken",option)
+    .clearCookie("refreshToken",option)
+    .json(
+        new ApiResponse(200 , {},"User Sucessfully Logged out ")
+    )
 
   })
 
 
 
 
-export {loginUser}
+export {loginUser ,logoutUser}
 
 
 
@@ -162,6 +185,28 @@ export {loginUser}
     because only the refreshToken field is being updated.
 6. Return both generated tokens   
 
+-------------------------------------------------------------------------------------------
+                               Logout User Flow
+-------------------------------------------------------------------------------------------
+
+1. Get the authenticated user's ID.
+   - Read the user ID from req.user.
+
+2. Remove the Refresh Token.
+   - Delete the stored Refresh Token from the user's document.
+
+3. Configure cookie options.
+   - Create secure authentication cookie settings.
+
+4. Clear authentication cookies.
+   - Remove the Access Token cookie.
+   - Remove the Refresh Token cookie.
+
+5. Send a success response.
+   - Return HTTP Status: 200 (OK).
+   - Return a success message.
+
+-------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 ✒️✒️  Step:7  dedails explanation
