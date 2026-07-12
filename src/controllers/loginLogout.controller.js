@@ -1,7 +1,7 @@
 import { User } from "../models/user.model.js";
-import { ApiError } from "../utils/ApiError";
-import { asyncHandler } from "../utils/asyncHandler";
-import ApiResponse from "../utils/ApiResponse";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import ApiResponse from "../utils/ApiResponse.js";
 
 
    // Write a commen method for Access & Refresh token for future use 
@@ -91,6 +91,14 @@ import ApiResponse from "../utils/ApiResponse";
 
     )
  })
+
+
+  const logoutUser=asyncHandler(async(req,res)=>{
+
+  })
+
+
+
 
 export {loginUser}
 
