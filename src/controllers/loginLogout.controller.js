@@ -13,10 +13,10 @@ import ApiResponse from "../utils/ApiResponse.js";
             const user= await User.findById(userId);
 
             // 2. Generate a short-lived Access Token
-            const accessToken=user.generateAccessToken();
+            const accessToken= await user.generateAccessToken();
 
             // 3. Generate a long-lived Refresh Token
-            const refreshToken=user.generateRefreshToken();
+            const refreshToken= await user.generateRefreshToken();
 
             // 4. Store the Refresh Token in the user's document (update databade )
             user.refreshToken=refreshToken;
@@ -29,6 +29,8 @@ import ApiResponse from "../utils/ApiResponse.js";
       
 
         } catch (error) {
+           console.log(error);
+           
             throw new ApiError(500 , "something went wrong while generating Access & Refresh token ")
                   
         }
@@ -42,7 +44,7 @@ import ApiResponse from "../utils/ApiResponse.js";
     const { email,username , password}=req.body
 
     // Step:-2. Validate the input.
-    if(!email || !username){
+    if(!email && !username){
         throw new ApiError(400, "Username or password is required ")
     }
   

@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    lowecase: true,
+    lowercase: true,
     trim: true,
   },
   fullName:
@@ -56,8 +56,8 @@ const userSchema = new mongoose.Schema({
 
 
 // This middleware runs automatically BEFORE a user document is saved
-userSchema.pre("save", async function (next) {
-  if (!this.isModified('password')) return next();  // This middleware runs automatically BEFORE a user document is saved
+userSchema.pre("save", async function () {
+  if (!this.isModified('password')) return ;  
 
   this.password = await bcrypt.hash(this.password, 10)  // This middleware runs automatically BEFORE a user document is saved,10 is the salt rounds 
   
