@@ -2,7 +2,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
-
+import jwt from "jsonwebtoken"
 
 // Write a commen method for Access & Refresh token for future use 
 
@@ -11,7 +11,7 @@ const generateAccessAndRefreshToken = async (userId) => {
       // 1.Find the user in the database using the user's ID
       const user = await User.findById(userId);
         if(!user){
-         throw new ApiError(404 , error.message )
+         throw new ApiError(404 , "User not found" )
         }
 
       // 2. Generate a short-lived Access Token
@@ -47,7 +47,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
    // Step:-2. Validate the input.
    if (!email && !username) {
-      throw new ApiError(400, "Username or password is required ")
+      throw new ApiError(400, "Email or password is required ")
    }
 
    // Step:-3. Find the user in the database.
@@ -83,7 +83,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
    return res.status(200)
       .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
       .json(
          new ApiResponse(
             200,
