@@ -4,213 +4,250 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
 
 
-   // Write a commen method for Access & Refresh token for future use 
+// Write a commen method for Access & Refresh token for future use 
 
-    const generateAccessAndRefreshToken=async(userId)=>
-     {
-        try {
-            // 1.Find the user in the database using the user's ID
-            const user= await User.findById(userId);
-
-            // 2. Generate a short-lived Access Token
-            const accessToken= await user.generateAccessToken();
-
-            // 3. Generate a long-lived Refresh Token
-            const refreshToken= await user.generateRefreshToken();
-
-            // 4. Store the Refresh Token in the user's document (update databade )
-            user.refreshToken=refreshToken;
-
-            // 5. Save the updated user in databade (update databade )
-            await user.save({validateBeforeSave:false})
-
-            // 6. Return both generated tokens  
-            return{accessToken ,refreshToken}
-      
-
-        } catch (error) {
-           console.log(error);
-           
-            throw new ApiError(500 , "something went wrong while generating Access & Refresh token ")
-                  
+const generateAccessAndRefreshToken = async (userId) => {
+   try {
+      // 1.Find the user in the database using the user's ID
+      const user = await User.findById(userId);
+        if(!user){
+         throw new ApiError(404 , error.message )
         }
-    }
+
+      // 2. Generate a short-lived Access Token
+      const accessToken = await user.generateAccessToken();
+
+      // 3. Generate a long-lived Refresh Token
+      const refreshToken = await user.generateRefreshToken();
+
+      // 4. Store the Refresh Token in the user's document (update databade )
+      user.refreshToken = refreshToken;
+
+      // 5. Save the updated user in databade (update databade )
+      await user.save({ validateBeforeSave: false })
+
+      // 6. Return both generated tokens  
+      return { accessToken, refreshToken }
 
 
- // Step: 1 - Get login credentials from the request body.
-  
- const loginUser=asyncHandler(async(req,res)=>{
+   } catch (error) {
+      console.log(error);
 
-    const { email,username , password}=req.body
+      throw new ApiError(500, "something went wrong while generating Access & Refresh token ")
 
-    // Step:-2. Validate the input.
-    if(!email && !username){
-        throw new ApiError(400, "Username or password is required ")
-    }
-  
-    // Step:-3. Find the user in the database.
-    const user= await User.findOne({
-        $or:[{email}, {username}]
-    })
+   }
+}
 
 
-    //Step:-4. Verify the user exists.
-     if(!user){
-        throw new ApiError(404 ,'User not found')
-    }
+// Step: 1 - Get login credentials from the request body.
 
-    //Step:-5. Verify the new user  password.
-    const  isPasswordValid= await user.isPasswordCorrect(password)   // ispasswordCorrect funcation in already created in user.modules.js 
+const loginUser = asyncHandler(async (req, res) => {
 
-    if(!isPasswordValid){
-        throw new ApiError(401 ," Wrong Password , Please enter correct password");
-    }
-    
-    //Step:-6. Generate Access Token and Refresh Token.
-    const{accessToken , refreshToken}= await generateAccessAndRefreshToken(user._id)
+   const { email, username, password } = req.body
 
-    //step:-7. Retrieve the logged-in user.   (details explanation ⬇️⬇️)
-    const loggedInUser= await User.findById(user._id).select("-password -refreshToken")
-    
-    //Step:-8. Configure and Set authentication cookies.
+   // Step:-2. Validate the input.
+   if (!email && !username) {
+      throw new ApiError(400, "Username or password is required ")
+   }
 
-    const option={     //(details explanation ⬇️⬇️)
-        httpOnly:true,
-        secure:true
-    }
+   // Step:-3. Find the user in the database.
+   const user = await User.findOne({
+      $or: [{ email }, { username }]
+   })
 
-    return res.status(200)
-    .cookie("accessToken",accessToken,option)
-    .cookie("refreshToken",refreshToken,option)
-    .json(
-        new ApiResponse(
+
+   //Step:-4. Verify the user exists.
+   if (!user) {
+      throw new ApiError(404, 'User not found')
+   }
+
+   //Step:-5. Verify the new user  password.
+   const isPasswordValid = await user.isPasswordCorrect(password)   // ispasswordCorrect funcation in already created in user.modules.js 
+
+   if (!isPasswordValid) {
+      throw new ApiError(401, " Wrong Password , Please enter correct password");
+   }
+
+   //Step:-6. Generate Access Token and Refresh Token.
+   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
+
+   //step:-7. Retrieve the logged-in user.   (details explanation ⬇️⬇️)
+   const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+
+   //Step:-8. Configure and Set authentication cookies.
+
+   const options = {     //(details explanation ⬇️⬇️)
+      httpOnly: true,
+      secure: true
+   }
+
+   return res.status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(
+         new ApiResponse(
             200,
             {
-                user:loggedInUser ,accessToken,refreshToken
+               user: loggedInUser, accessToken, refreshToken
             },
             "User loggged in Successfully "
-        )
+         )
 
-    )
- })
+      )
+})
 
 
-  const logoutUser=asyncHandler(async(req,res)=>{
-    
+const logoutUser = asyncHandler(async (req, res) => {
+
+  //Step :-1. Get the authenticated user's ID.
    await User.findByIdAndUpdate(
-        req.user._id,
-        {
-              refreshToken: undefined  
-        },
-        {
-            new:true
-        }
-    )
+      req.user._id,
+      {
+         refreshToken: undefined  // Step:-2. Remove the Refresh Token.
+      },
+      {
+         new: true
+      }
+   )
    
-    const option={     //(details explanation ⬇️⬇️)
-        httpOnly:true,
-        secure:true
-    }
-    
-    return res
-    .status(200)
-    .clearCookie("accessToken",option)
-    .clearCookie("refreshToken",option)
-    .json(
-        new ApiResponse(200 , {},"User Sucessfully Logged out ")
-    )
+   //Step:-3. Configure cookie options.
+   const options = {     //(details explanation ⬇️⬇️)
+      httpOnly: true,
+      secure: true
+   }
 
-  })
+   //Step:4. Clear authentication cookies.
+   return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json(
+         new ApiResponse(200, {}, "User Sucessfully Logged out ")
+      )  //5. Send a success response.
 
-
-
-
-export {loginUser ,logoutUser}
+})
 
 
+//Generate refresh AccessToken endpoint
 
+const refreshAccessToken = asyncHandler(async (req, res) => {
 
-/*-------------------------------------------------------------------------------------------
-                                   Login User Flow
---------------------------------------------------------------------------------------------
-
-1. Get login credentials from the request body.
-   - Email
-   - Username
-   - Password
-
-2. Validate the input.
-   - Ensure either Email or Username is provided.
-
-3. Find the user in the database.
-   - Search by Email or Username.
-
-4. Verify the user exists.
-   - If no user is found, return an error.
-
-5. Verify the new user password
-   - Compare the entered password with the hashed password.
-
-6. Generate Access Token and Refresh Token.
-   - Save the Refresh Token in the database.
-
-7. Retrieve the logged-in user.
-   - details explanation ⬇️⬇️
-   - Exclude password and refreshToken from the response.
-
-8. Configure and Set authentication cookies.
-   - Create cookie options.
-   - Store Access Token in an HTTP-only cookie.
-   - Store Refresh Token in an HTTP-only cookie.
-
-9. Send a success response.
-   - Return user details.
-   - Return Access Token and Refresh Token.
-   - Return success message.
-
--------------------------------------------------------------------------------------------
-                    enerateAccessAndRefreshToken flow
- -----------------------------------------------------------------------------------------
+   //1 - Get the refresh token from cookies or the request body.
+   const incommingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
  
-1. Find the user in the database using the user's ID
+   //2.- Validate the Refresh Token.
+   if (!incommingRefreshToken) {
+      throw new ApiError(401, "Unauthorized request ")
+   }
 
-2. Generate a short-lived Access Token
-   - call generateAccessToken(), 
-   - already created in user.modules.js 
+   try {
+      //3.- Verify and decode the refresh token using the secret key
+      const decodedToken = jwt.verify(
+         incommingRefreshToken,
+         process.env.REFRESH_TOKEN_SECRET
+      )
 
-3. Generate a long-lived Refresh Token
-   - call generateRefreshToken()
-   - already created in user.modules.js 
+      //4.- Find the user whose ID is stored inside the decoded token
+      const user = await User.findById(decodedToken?._id)
 
-4. Store the Refresh Token in the user's document  -update databade 
-5. Save the updated user document in database .Skip schema validation -update databade 
-    because only the refreshToken field is being updated.
-6. Return both generated tokens   
+      if (!user) {
+         throw new ApiError(404, 'Invalid Refresh Token')
+      }
 
--------------------------------------------------------------------------------------------
-                               Logout User Flow
--------------------------------------------------------------------------------------------
+      //5.- Compare the incoming refresh token with the one stored in the database
+      if (incommingRefreshToken !== user?.refreshToken) {
+         throw new ApiError(401, " Refresh token is expired or used ")
+      }
 
-1. Get the authenticated user's ID.
-   - Read the user ID from req.user.
+      //6.- Generate a new access token and a new refresh token
+      const { accessToken, newRefreshToken } = await generateAccessAndRefreshToken(user?._id)
 
-2. Remove the Refresh Token.
-   - Delete the stored Refresh Token from the user's document.
 
-3. Configure cookie options.
-   - Create secure authentication cookie settings.
+      //7.-Cookie configuration
+      const options = {
+         httpOnly: true,
+         secure: true
+      }
+      
+      //8.-Send the newly generated tokens as cookies and also return them in the response body
+      return res
+         .status(200)
+         .cookie("accessToken", accessToken, options)
+         .cookie("refreshToken", refreshToken, options)
+         .json(
+            new ApiResponse(
+               200,
+               { accessToken, newRefreshToken },
+               "Access token regenerate ot refresh ")
+         )
+   } catch (error) {
+     
+      throw new ApiError(401, error?.message || "Invaluid refresh token")
+   }
 
-4. Clear authentication cookies.
-   - Remove the Access Token cookie.
-   - Remove the Refresh Token cookie.
 
-5. Send a success response.
-   - Return HTTP Status: 200 (OK).
-   - Return a success message.
+})
 
--------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------
+export { loginUser, logoutUser  ,refreshAccessToken}
+
+
+
+/*===============================================================================================================
+
+ LOGIN USER                generateAccessAndRefreshToken         refreshAccessToken                   LOGOUT USER
+ ──────────                     ───────────────                    ─────────────                     ───────────
+
+ Request                        Receive User ID                   Receive Refresh Token             Authenticated User
+     │                               │                                   │                                │
+     ▼                               ▼                                   ▼                                ▼
+ Get Email / Username /          Find User by ID                  Read Token from                 Read req.user._id
+ Password                            │                             Cookie / Request Body                │
+     │                               ▼                                   │                                ▼
+     ▼                         User Exists?                              ▼                         Remove Refresh Token
+ Validate Input                      │                           Token Present?                  ($unset refreshToken)
+ (Email OR Username)            No ─► Error                           │                                │
+     │                         Yes ▼                              No ─► 401 Error                     ▼
+     ▼                               │                           Yes ▼                        Create Cookie Options
+ Find User by                    Generate Access Token                 │                        (httpOnly, secure)
+ Email / Username                     │                                ▼                                │
+     │                               ▼                         Verify JWT using                        ▼
+     ▼                         Generate Refresh Token          REFRESH_TOKEN_SECRET            Clear Access Token Cookie
+ User Exists?                         │                                │                                │
+ No ─► Error                          ▼                                ▼                                ▼
+ Yes ▼                        Save Refresh Token              Extract User ID             Clear Refresh Token Cookie
+     │                        in Database                           │                                │
+     ▼                               │                                ▼                                ▼
+ Verify Password                     ▼                         Find User by ID                Return Success (200)
+ (Compare Hashed Password)      Save User                           │
+     │                      (validateBeforeSave:false)              ▼
+     ▼                               │                         User Exists?
+ Generate Access Token               ▼                          No ─► Error
+ Generate Refresh Token        Return Tokens                      Yes ▼
+     │                                                             │
+     ▼                                                             ▼
+ Save Refresh Token                                     Compare Incoming Token
+ in Database                                           with Stored Refresh Token
+     │                                                             │
+     ▼                                                      Tokens Match?
+ Get Logged-in User                                           No ─► 401 Error
+ (Exclude Password &                                          Yes ▼
+ Refresh Token)                                                  │
+     │                                                           ▼
+     ▼                                                Generate New Access Token
+ Create Cookie Options                               Generate New Refresh Token
+ (httpOnly, secure)                                          │
+     │                                                       ▼
+     ▼                                             
+ Set Access Token Cookie                                     
+     │                                                       
+     ▼                                             Set New Authentication Cookies
+ Set Refresh Token Cookie                                     │
+     │                                                       ▼
+     ▼                                             Return New Tokens + Success
+ Return User +
+ Tokens + Success
+
+===============================================================================================================
 ✒️✒️  Step:7  dedails explanation
 -----------------------------
 Why do we fetch the user again from the database?
