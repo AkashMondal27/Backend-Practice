@@ -1,7 +1,7 @@
-import { User } from "../models/user.model";
-import { ApiError } from "../utils/ApiError";
-import ApiResponse from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
+import { User } from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 
 
@@ -10,7 +10,7 @@ const chnageCurrentPassword = asyncHandler(async (req, res) => {
     // Step: 1 - Get login credentials details  from the request body.
     const { oldPassword, newPassword, confirmPassword } = req.body
 
-    //Step:-2. Verify newPassword & oldPassword
+    //Step:-2. Verify newPassword & confirmPassword
     if (newPassword !== confirmPassword) {
         throw new ApiError(
             400,
@@ -18,7 +18,7 @@ const chnageCurrentPassword = asyncHandler(async (req, res) => {
         );
     }
 
-    //Step :3. find the user id 
+    //Step :3. find the user  bu user id 
     const user = await User.findById(req.body?._id)
     if (!user) {
         throw new ApiError(404, 'User not found')
